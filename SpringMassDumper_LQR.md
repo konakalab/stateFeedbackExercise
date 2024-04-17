@@ -1,7 +1,8 @@
 
-# <span style="color:rgb(213,80,0)">ばね・おもり・ダンパ系のシミュレーション(制御なし)</span>
+# <span style="color:rgb(213,80,0)">ばね・おもり・ダンパ系のシミュレーション</span>
+# <span style="color:rgb(213,80,0)">(状態フィードバック制御・最適制御)</span>
 
-このファイルではばね・おもり・ダンパ系に対し，制御を加えないシミュレーションを実行します．
+このファイルではばね・おもり・ダンパ系に対し，最適制御による状態フィードバック制御のシミュレーションを実行します．
 
 ## 系の設定
 
@@ -83,6 +84,67 @@ R
 R = 1
 ```
 
+最適制御のフィードバックベクトルを算出
+
+```matlab
+[K_LQR,S,P] = lqr(sys,Q,R)
+```
+
+```TextOutput
+K_LQR = 1x2    
+    0.4142    0.6818
+S = 2x2    
+1.3784    0.4142
+    0.4142    0.6818
+P = 2x1 complex    
+  -0.8409 + 0.8409i
+  -0.8409 - 0.8409i
+```
+
+フィードバック後の閉ループ系の固有値
+
+```matlab
+eig(A-b*K_LQR)
+```
+
+```TextOutput
+ans = 2x1 complex    
+  -0.8409 + 0.8409i
+  -0.8409 - 0.8409i
+```
+
+フィードバック後の閉ループ系の状態空間表現
+
+ $$ \dot{\;x} =\textrm{Ax}-\textrm{bkx}=\left(A-\textrm{bk}\right)x $$ 
+```matlab
+sys1 = ss(A-b*K_LQR,zeros(size(b)),c,d)
+```
+
+```TextOutput
+sys1 =
+ 
+  A = 
+           x1      x2
+   x1       0       1
+   x2  -1.414  -1.682
+ 
+  B = 
+       u1
+   x1   0
+   x2   0
+ 
+  C = 
+       x1  x2
+   y1   1   0
+ 
+  D = 
+       u1
+   y1   0
+ 
+連続時間状態空間モデル。
+モデル プロパティ
+```
+
 初期条件
 
 ```matlab
@@ -98,8 +160,8 @@ x0 = 2x1
 初期条件からの応答を計算して図示
 
 ```matlab
-[y,tOut,x]=initial(sys,x0);
-u=zeros(size(tOut));
+[y,tOut,x]=initial(sys1,x0);
+u=-(K_LQR*x')';
 figure
 tiledlayout(3,1)
 nexttile
@@ -117,37 +179,44 @@ ylabel('入力')
 xlabel('時刻')
 ```
 
-<center><img src="SpringMassDumper_noControl_media/figure_0.png" width="562" alt="figure_0.png"></center>
+<center><img src="SpringMassDumper_LQR_media/figure_0.png" width="562" alt="figure_0.png"></center>
 
 
 ```matlab
 figure;
 tiledlayout(2,1);
 nexttile
-h2=plot(tOut,x);
+h2=plot(tOut,[x u]);
 hold on;
 h2_x=plot(0,x(1,1),'bs');
 h2_v=plot(0,x(1,2),'rs');
+h2_u=plot(0,u(1),'Color',[0.9290 0.6940 0.1250],'Marker','s');
 grid on;
 xlabel('時刻');
-ylabel('位置，速度');
-legend(h2,{'位置','速度'})
+ylabel('位置，速度，入力');
+legend(h2,{'位置','速度','入力'})
 nexttile
 hold on;
 h1=plot(x0(1),0,'s','MarkerSize',20);
 h1_v=quiver(x0(1),0,x(1,2),0,'off');
 h1_v.ShowArrowHead="off";
 h1_v.LineWidth=1.5;
-% set(h1_v,'scale','off')
+
+h1_u=quiver(x0(1),0.01,u(1),0,'off','Color',[0.9290 0.6940 0.1250]);
+h1_u.ShowArrowHead="off";
+h1_v.LineWidth=1.5;
 grid on;
 plot(0,0,'g>','MarkerSize',20)
 xlim([min(y)-0.1 max(y)+0.1]);
+ylim(0.1*[-1 1]);
 grid on
 for n1=1:size(y,1)-1
     set(h1,XData=y(n1));
     set(h2_x,XData=tOut(n1), YData=y(n1));
     set(h2_v,XData=tOut(n1), YData=x(n1,2));
+    set(h2_u,XData=tOut(n1), YData=u(n1));
     set(h1_v,"XData",y(n1),"UData",x(n1,2));
+    set(h1_u,"XData",y(n1),"UData",u(n1));
     title(['時刻:' num2str(tOut(n1),'%1.3f') '[s]'])
     if Opt.drawAnimation
         pause(0.05);
@@ -155,7 +224,7 @@ for n1=1:size(y,1)-1
 end
 ```
 
-<center><img src="SpringMassDumper_noControl_media/figure_1.png" width="562" alt="figure_1.png"></center>
+<center><img src="SpringMassDumper_LQR_media/figure_1.png" width="562" alt="figure_1.png"></center>
 
 
 評価(値が小さく0に近いほど良い)
@@ -167,5 +236,5 @@ J=sum(Q(1,1)*x(1:end-1,1).^2.*diff(tOut)) ...
 ```
 
 ```TextOutput
-J = 1.5460
+J = 1.4107
 ```
