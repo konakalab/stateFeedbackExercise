@@ -9,6 +9,9 @@
 
 また，parameterSetup.m は制御対象やアニメーション描画の有無などを設定するファイルです．
 
+- 状態変数(位置と速度)，および入力(外力)をアニメーションで表示できます．
+<center><img src="sampleOut.gif" width="562" alt="figure_1.png"></center>
+
 # MATLAB Onlineへのリンク
 以下のリンクをクリックするとMATLAB Onlineで開くことができます
 （無料のMathWorksアカウントが必要です．有料のMATLABライセンスは不要です）
