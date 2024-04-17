@@ -115,7 +115,7 @@ ans = 2x1 complex
 
 フィードバック後の閉ループ系の状態空間表現
 
- $$ \dot{\;x} =\textrm{Ax}-\textrm{bkx}=\left(A-\textrm{bk}\right)x $$ 
+ $$ \dot{x} =Ax-bkx=(A-bk)x $$ 
 ```matlab
 sys1 = ss(A-b*K_LQR,zeros(size(b)),c,d)
 ```
