@@ -10,7 +10,7 @@
 
 微分方程式は以下です．
 
- $$ M\ddot{x} =-D\dot{\;x} -\textrm{Kx}+u $$ 
+ $$ M\ddot{x} =-D\dot{x} -\textrm{Kx}+u $$ 
 ```matlab
 clear
 clc
@@ -32,7 +32,7 @@ ans = 1x3
 
 状態空間表現
 
- $$ \dot{\;x} =\textrm{Ax}+\textrm{bu},y=\textrm{cx} $$ 
+ $$ \dot{x} =\textrm{Ax}+\textrm{bu},y=\textrm{cx} $$ 
 ```matlab
 sys=ss(A,b,c,d)
 ```
@@ -64,7 +64,7 @@ sys =
 
 評価関数とその重み
 
- $$ J=\int_0^{\infty \;} \left(x^T \textrm{Qx}+{u^T \textrm{Ru}}^{\;} \right)\textrm{dt} $$ 
+ $$ J=\int_0^{\infty } \left(x^T \textrm{Qx}+u^T \textrm{Ru}\right)\textrm{dt} $$ 
 ```matlab
 Q
 ```
